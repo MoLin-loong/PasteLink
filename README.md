@@ -1,4 +1,4 @@
-# PasteLink（粘贴即连）
+# PasteLink
 
 ## PasteLink – stay in the flow of vibe coding.
 
