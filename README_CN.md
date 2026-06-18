@@ -1,4 +1,4 @@
-# PasteLink（粘贴即连）
+# PasteLink
 
 手机打字，直接"粘贴"到电脑光标处。
 
