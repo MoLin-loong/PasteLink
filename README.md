@@ -43,7 +43,6 @@ PasteLink 就是为这个瞬间准备的。
 | 文件 | 用途 |
 |------|------|
 | `pastelink.py` | Python 源码，适合开发者或定制使用 |
-| `pastelink.ps1` | PowerShell 一键启动脚本（可选） |
 | `PasteLink.exe` | Windows 打包版本，无需 Python 环境 |
 
 > 注：`ps1` 为可选的快速启动方式，并非必需。
