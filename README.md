@@ -1,4 +1,4 @@
-# PasteLink（粘贴即连）
+# PasteLink
 
 **PasteLink** – send text from your phone directly to your PC cursor.  
 Both devices must be on the same local network. Scan the QR code shown on your PC with your phone, then type and paste instantly.  
