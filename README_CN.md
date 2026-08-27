@@ -1,4 +1,4 @@
-# PasteLink（粘贴即连）
+# PasteLink
 
 <p align="center">
   <img src="ABB_rounded.png" alt="PasteLink 图标" width="96">
