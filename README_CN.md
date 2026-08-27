@@ -1,102 +1,121 @@
 # PasteLink（粘贴即连）
 
-手机打字，直接"粘贴"到电脑光标处。
+<p align="center">
+  <img src="ABB_rounded.png" alt="PasteLink 图标" width="96">
+</p>
 
-## 功能特点
+<p align="center">
+  <strong>中文</strong> · <a href="README.md">English</a>
+</p>
 
-- **零安装**：手机无需安装任何应用，扫描二维码即可使用
-- **即扫即用**：手机浏览器打开网页，输入文字后发送
-- **精准定位**：文字直接粘贴到电脑鼠标光标所在位置
-- **跨平台支持**：支持 Windows 和 Linux 系统
-- **便携版**：提供 Windows 便携版（.exe），无需 Python 环境
-- **实时连接**：WebSocket 实现低延迟实时通信
-- **自动重连**：网络中断后自动重连机制
+把手机浏览器变成电脑的低延迟键盘和触控板。手机无需安装 App：在电脑运行 PasteLink，扫描二维码后即可在同一局域网内使用。
 
-## 工作原理
+## 功能亮点
 
-1. 电脑运行脚本，显示二维码
-2. 手机扫描二维码，打开网页键盘
-3. 手机输入文字，点击发送
-4. 文字直接粘贴到电脑当前光标位置
+- **手机零安装**：全部操作都在手机浏览器中完成。
+- **输入框与触控板同屏**：不再进入两个互相独立的页面。
+- **自适应布局**：点击输入框时输入区展开；触摸触控板时触控板展开，并自动收起手机软键盘。
+- **跟手的鼠标控制**：单指相对移动、轻点左键，以及按帧合并的双指高分辨率平滑滚动。
+- **鼠标按键顺手可用**：鼠标左键和右键位于上箭头两侧。
+- **丰富的键盘控制**：回车、退格、方向键、剪贴板历史以及完整键盘布局。
+- **可调节手感**：鼠标灵敏度、滚轮速度、退格连发间隔和底部安全区均可设置，并保存在手机浏览器中。
+- **Windows 便携版**：直接运行 `PasteLink.exe`，电脑无需安装 Python。
 
 ## 快速开始
 
-### Windows 版本
+### Windows 便携版
 
-#### 方式一：直接运行（推荐）
+1. 下载或克隆本仓库。
+2. 双击 `PasteLink.exe`。
+3. 用手机扫描终端中的二维码，或手动打开终端显示的地址。
+4. 确保手机与电脑连接到同一局域网。
 
-双击 `PasteLink.exe` 即可启动，无需安装 Python。
+### Windows 源码运行
 
-#### 方式二：从源码运行
-
-```bash
-# 安装依赖
+```powershell
 pip install qrcode websockets pyperclip pyautogui
-
-# 运行脚本
 python PasteLink.py
 ```
 
-### Linux 版本
+### Linux 源码运行
 
 ```bash
-# 安装依赖
 pip install qrcode websockets
 
-# 安装系统工具
-sudo apt install xdotool          # X11 桌面
-# 或
-sudo apt install wl-clipboard ydotool  # Wayland 桌面
+# X11
+sudo apt install xdotool
 
-# 运行脚本
+# Wayland 可选方案
+sudo apt install wl-clipboard ydotool
+
 python Linux/PasteLink_Linux.py
 ```
 
-## 使用说明
+Linux 版本目前主要提供远程文字输入；组合触控板、模拟鼠标按键和扩展键盘控制由 Windows 版本提供。
 
-1. 运行脚本后，终端会显示二维码和访问地址
-2. 手机扫描二维码或手动输入地址（如 `http://192.168.1.100:8766`）
-3. 手机浏览器会打开一个简洁的输入界面
-4. 在手机上输入文字，点击"发送"按钮
-5. 文字会立即粘贴到电脑鼠标光标所在位置
+## 手机界面使用方法
 
-## 系统要求
+### 文字输入
 
-### Windows
-- Windows 10 或更高版本
-- 便携版无需 Python 环境
+1. 点击输入框，输入区域会展开，触控板会压缩。
+2. 在手机输入文字后点击 **发送**。
+3. PasteLink 会在电脑端复制文字，并粘贴到当前目标窗口。
 
-### Linux
-- Python 3.7+
-- X11 或 Wayland 桌面环境
-- 系统工具：`xdotool`（X11）或 `wl-clipboard` + `ydotool`（Wayland）
+快捷键区域还提供回车、退格、方向键和 Windows 剪贴板历史（`Win+V`）。退格键支持长按连发。
 
-## 依赖项
+### 触控板
 
-- `qrcode` - 生成二维码
-- `websockets` - WebSocket 通信
-- `pyperclip` - 剪贴板操作（仅 Windows）
-- `pyautogui` - 模拟键盘输入（仅 Windows，备用方案）
+点击或触摸输入框下方的触控板。触控板会展开，输入框会压缩，同时手机软键盘会自动收起。
 
-## 网络配置
+- **单指拖动**：相对移动电脑鼠标。
+- **单指轻点**：鼠标左键单击。
+- **双指上下滑动**：高分辨率平滑滚动。
+- **`↑` 两侧的左键 / 右键**：按下和松开对应鼠标键；长按后移动可用于拖拽。
 
-- 默认端口：
-  - HTTP 服务：8766（手机网页访问）
-  - WebSocket：8765（实时通信）
-- 确保手机和电脑在同一局域网内
-- 如遇防火墙问题，请放行上述端口
+右上角的键盘/鼠标按钮用于在输入区与触控板之间切换焦点；旁边的完整键盘按钮可打开完整键盘布局。
 
-## 退出程序
+### 设置
 
-按 `Ctrl+C` 退出程序。
+点击齿轮按钮可以调节：
+
+- 鼠标灵敏度
+- 滚轮速度
+- 退格连发间隔
+- 针对手机底部安全区或黑色导航栏的额外留白
+
+设置会保存在手机浏览器本地。
+
+## 网络与安全
+
+PasteLink 会监听电脑的全部本地网络接口，目前不提供身份验证或传输加密。请仅在可信的私人网络中使用，并在不需要时关闭程序。
+
+- HTTP 手机界面：`8766`
+- WebSocket 控制通道：`8765`
+- 手机与电脑必须能够在局域网内互相访问。
+- 如果启动时出现 `WinError 10048`，表示已有 PasteLink 进程占用了端口，请先关闭旧进程。
+
+## 开发与测试
+
+运行回归测试：
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+主要文件：
+
+- `PasteLink.py`：Windows 服务端与内嵌手机界面
+- `PasteLink.exe`：Windows 便携版
+- `Linux/PasteLink_Linux.py`：Linux 文字输入实现
+- `tests/`：组合布局与高分辨率滚动回归测试
 
 ## 许可证
 
-MIT License - 详见 [LICENSE](LICENSE) 文件
+[MIT](LICENSE)
 
 ## 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提交 Issue 和 Pull Request。
 
 ## 作者
 
