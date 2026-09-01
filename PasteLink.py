@@ -1,5 +1,5 @@
 """手机快速输入 — 手机当电脑键盘/鼠标，扫码即用"""
-import asyncio, os, socket, sys, threading, time, ctypes
+import asyncio, os, socket, sys, threading, time, ctypes, getpass, hashlib, json, uuid
 
 if sys.platform == "win32":
     sys.stdout.reconfigure(errors="replace") if hasattr(sys.stdout, "reconfigure") else None
@@ -11,6 +11,24 @@ pyautogui.FAILSAFE = True
 pyautogui.PAUSE = 0  # 去掉默认 0.1s 间隔，降低按键延迟
 
 user32 = ctypes.windll.user32
+
+
+def get_device_info():
+    """Return a stable, non-sensitive identity for this computer."""
+    username = getpass.getuser().strip()
+    hostname = socket.gethostname().strip()
+    default_name = username or hostname or "电脑"
+    fingerprint = f"{hostname}\0{uuid.getnode()}\0{username}"
+    device_id = hashlib.sha256(fingerprint.encode("utf-8")).hexdigest()[:16]
+    return {"id": device_id, "name": default_name}
+
+
+def build_device_message(info):
+    return "__DEVICE__ " + json.dumps(info, ensure_ascii=False, separators=(",", ":"))
+
+
+DEVICE_INFO = get_device_info()
+DEVICE_MESSAGE = build_device_message(DEVICE_INFO)
 
 HTML = r"""<!DOCTYPE html>
 <html lang=zh-CN>
@@ -25,11 +43,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 button{font-family:inherit}
 /* header */
 .header{padding:10px 14px;background:var(--surface);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.left-h{display:flex;align-items:center;gap:9px;min-width:0}
+.left-h{display:flex;align-items:center;gap:9px;min-width:0;flex:1;overflow:hidden;margin-right:8px}
 .dot{width:9px;height:9px;border-radius:50%;background:var(--danger);flex-shrink:0}
 .dot.on{background:var(--accent);box-shadow:0 0 8px rgba(78,204,163,.6)}
-.status{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.h-actions{display:flex;align-items:center;gap:8px}
+.status{font-size:13px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.device-name{min-width:0;max-width:clamp(64px,24vw,120px);padding:5px 8px;border:1px solid rgba(78,204,163,.34);border-radius:8px;background:rgba(78,204,163,.09);color:var(--accent);font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.device-name:active{background:rgba(78,204,163,.2)}
+.h-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .icon-btn{width:40px;height:40px;border:none;border-radius:11px;background:var(--surface2);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .1s,background .15s}
 .icon-btn:active{transform:scale(.92);background:var(--line)}
 .icon-btn svg{width:22px;height:22px}
@@ -43,8 +63,8 @@ textarea:focus{border-color:var(--accent)}
 .kb-view.mouse-active .trackpad-zone{flex-grow:6;min-height:140px}
 .kb-tools{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
 .kb-nav{display:flex;gap:8px;align-items:stretch}
-.kb-nav>.kb-key{flex:1;min-width:0}
-.dpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:8px;flex:1;min-width:0}
+.kb-nav>.kb-key{flex:.8 1 0;min-width:0}
+.dpad{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:8px;flex:1.4 1 0;min-width:0}
 .kb-nav>.kb-key[data-k="Enter"]{font-size:22px}
 .dpad .mouse-left{grid-column:1;grid-row:1}
 .dpad .up{grid-column:2;grid-row:1}
@@ -69,6 +89,14 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
 .row label span{color:var(--accent);font-weight:600}
 .row input[type=range]{width:100%;accent-color:var(--accent)}
 .panel .close{width:100%;padding:12px;background:var(--accent);color:var(--bg);border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}
+.rename-panel h3{margin-bottom:8px}
+.panel-note{color:var(--muted);font-size:13px;line-height:1.55;margin-bottom:16px}
+.name-input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);color:var(--text);font-size:16px;outline:none}
+.name-input:focus{border-color:var(--accent)}
+.dialog-actions{display:flex;gap:10px;margin-top:16px}
+.dialog-actions button{flex:1;padding:11px;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer}
+.dialog-cancel{border:1px solid var(--line);background:var(--surface2);color:var(--text)}
+.dialog-save{border:none;background:var(--accent);color:var(--bg)}
 /* trackpad */
 #pad{width:100%;height:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;touch-action:none;outline:none;box-shadow:inset 0 2px 12px rgba(0,0,0,.28);min-height:0;transition:border-color .2s,box-shadow .2s}
 .kb-view.mouse-active #pad{border-color:var(--accent);box-shadow:inset 0 2px 12px rgba(0,0,0,.28),0 0 0 1px rgba(78,204,163,.18)}
@@ -84,7 +112,7 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
 .fk.ctrl{flex:1.4}
 </style>
 <div class=header>
-  <div class=left-h><div class=dot id=dot></div><span class=status id=status>正在连接...</span></div>
+  <div class=left-h><div class=dot id=dot></div><span class=status id=status>正在连接...</span><button class="device-name hidden" id=deviceName title="点击自定义设备名称"></button></div>
   <div class=h-actions>
     <button class="icon-btn" id=setBtn title="设置">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -96,6 +124,19 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
       <svg id=ic-kb viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>
       <svg id=ic-ms viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="hidden"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 3v18M6 8h6M6 12h6M6 16h6"/></svg>
     </button>
+  </div>
+</div>
+
+<!-- device name -->
+<div class="overlay hidden" id=deviceOverlay>
+  <div class="panel rename-panel">
+    <h3>设备名称</h3>
+    <p class=panel-note>给当前电脑设置一个便于识别的名称。留空保存可恢复默认用户名。</p>
+    <input class=name-input id=deviceNameInput maxlength=32 autocomplete=off placeholder="输入设备名称">
+    <div class=dialog-actions>
+      <button class=dialog-cancel id=deviceCancel>取消</button>
+      <button class=dialog-save id=deviceSave>保存</button>
+    </div>
   </div>
 </div>
 
@@ -176,6 +217,41 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
 
 <script>
 var ws,rt,h=location.hostname,mode="kb";
+var DEVICE_PREFIX="__DEVICE__ ",deviceId="",deviceDefaultName="";
+var deviceName=document.getElementById("deviceName"),deviceOverlay=document.getElementById("deviceOverlay"),deviceNameInput=document.getElementById("deviceNameInput");
+function deviceStorageKey(id){return "pastelink_device_name_"+id;}
+function storedDeviceName(){
+ try{return localStorage.getItem(deviceStorageKey(deviceId))||"";}catch(e){return "";}
+}
+function showDeviceName(){
+ var display=storedDeviceName()||deviceDefaultName;
+ deviceName.textContent=display;deviceName.title="当前设备："+display+"（点击改名）";deviceName.classList.remove("hidden");
+}
+function applyDeviceInfo(info){
+ if(!info||typeof info.id!=="string"||typeof info.name!=="string")return;
+ deviceId=info.id;deviceDefaultName=info.name||"电脑";showDeviceName();
+}
+function closeDeviceEditor(){deviceOverlay.classList.add("hidden");deviceNameInput.blur();}
+deviceName.onclick=function(){
+ if(!deviceId)return;
+ deviceNameInput.value=storedDeviceName()||deviceDefaultName;
+ deviceOverlay.classList.remove("hidden");
+ setTimeout(function(){deviceNameInput.focus();deviceNameInput.select();},0);
+};
+document.getElementById("deviceCancel").onclick=closeDeviceEditor;
+document.getElementById("deviceSave").onclick=function(){
+ var alias=deviceNameInput.value.trim().slice(0,32);
+ try{
+  if(alias&&alias!==deviceDefaultName)localStorage.setItem(deviceStorageKey(deviceId),alias);
+  else localStorage.removeItem(deviceStorageKey(deviceId));
+ }catch(e){}
+ showDeviceName();closeDeviceEditor();
+};
+deviceNameInput.addEventListener("keydown",function(e){
+ if(e.key==="Enter"){e.preventDefault();document.getElementById("deviceSave").click();}
+ else if(e.key==="Escape")closeDeviceEditor();
+});
+deviceOverlay.addEventListener("click",function(e){if(e.target===deviceOverlay)closeDeviceEditor();});
 /* settings (persisted) */
 var SET={sen:1,scr:1,rep:150,pad:0};
 try{var s=JSON.parse(localStorage.getItem("pastelink_set"));if(s)SET=Object.assign(SET,s);}catch(e){}
@@ -184,7 +260,11 @@ function saveSet(){try{localStorage.setItem("pastelink_set",JSON.stringify(SET))
 function conn(){
  ws=new WebSocket("ws://"+h+":8765");
  ws.onopen=function(){document.getElementById("dot").className="dot on";document.getElementById("status").textContent="已连接"};
- ws.onclose=function(){document.getElementById("dot").className="dot";document.getElementById("status").textContent="已断开，重连中...";clearTimeout(rt);rt=setTimeout(conn,3000)};
+ ws.onmessage=function(e){
+  if(typeof e.data!=="string"||e.data.indexOf(DEVICE_PREFIX)!==0)return;
+  try{applyDeviceInfo(JSON.parse(e.data.slice(DEVICE_PREFIX.length)));}catch(err){}
+ };
+ ws.onclose=function(){document.getElementById("dot").className="dot";document.getElementById("status").textContent="已断开，重连中...";deviceName.classList.add("hidden");clearTimeout(rt);rt=setTimeout(conn,3000)};
  ws.onerror=function(){ws.close()};
 }
 function sendRaw(t){if(ws&&ws.readyState===1)ws.send(t);}
@@ -681,6 +761,7 @@ async def ws_handler(ws):
     print(f"已连接: {ws.remote_address}")
     loop = asyncio.get_running_loop()
     try:
+        await ws.send(DEVICE_MESSAGE)
         async for msg in ws:
             if msg == "__PING__":
                 await ws.send("__PONG__")

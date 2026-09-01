@@ -13,10 +13,11 @@ Use a phone browser as a low-latency keyboard and touchpad for your computer. Th
 ## Highlights
 
 - **No phone installation** — the controller runs entirely in the mobile browser.
+- **Per-computer identity** — the connected computer name appears beside the status indicator; tap it to set a separate alias for each computer.
 - **Combined input and touchpad view** — the text area and trackpad stay on one screen.
 - **Adaptive layout** — focusing the text area enlarges it; touching the trackpad enlarges the trackpad and dismisses the phone keyboard.
 - **Responsive mouse control** — one-finger relative movement, tap-to-left-click, and frame-coalesced two-finger smooth scrolling.
-- **Convenient mouse buttons** — left and right mouse buttons sit beside the up-arrow key.
+- **Convenient mouse buttons** — a wider six-key navigation cluster puts left and right mouse buttons beside the up-arrow key, with compact Enter and Backspace keys on the sides.
 - **Keyboard controls** — Enter, Backspace, arrow keys, clipboard history, and a full keyboard layout.
 - **Adjustable behavior** — mouse sensitivity, scroll speed, Backspace repeat rate, and bottom safe-area padding are persisted in the browser.
 - **Portable Windows build** — `PasteLink.exe` runs without a local Python installation.
@@ -54,6 +55,10 @@ python Linux/PasteLink_Linux.py
 The Linux implementation currently focuses on remote text input. The combined touchpad, simulated mouse buttons, and extended keyboard controls are provided by the Windows implementation.
 
 ## Using the Mobile Interface
+
+### Connected computer name
+
+After the connection is established, the current computer name appears beside **Connected**. It uses the computer's Windows username by default. Tap the name to assign a custom alias; aliases are stored locally in the phone browser and kept separately for each computer.
 
 ### Text input
 
@@ -107,7 +112,7 @@ Important project files:
 - `PasteLink.py` — Windows server and embedded mobile interface
 - `PasteLink.exe` — portable Windows executable
 - `Linux/PasteLink_Linux.py` — Linux text-input implementation
-- `tests/` — layout and high-resolution scrolling regression tests
+- `tests/` — device identity, layout, and high-resolution scrolling regression tests
 
 ## License
 

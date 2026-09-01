@@ -22,6 +22,11 @@ class CombinedLayoutTests(unittest.TestCase):
         self.assertLess(left_mouse, up_arrow)
         self.assertLess(up_arrow, right_mouse)
 
+    def test_six_key_dpad_is_wider_than_the_side_keys(self):
+        self.assertIn('.kb-nav>.kb-key{flex:.8 1 0;', SOURCE)
+        self.assertIn('.dpad{', SOURCE)
+        self.assertIn('flex:1.4 1 0;', SOURCE)
+
     def test_focus_switches_the_space_allocation(self):
         self.assertIn('.kb-view.mouse-active textarea', SOURCE)
         self.assertIn('.kb-view.mouse-active .trackpad-zone', SOURCE)
