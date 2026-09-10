@@ -145,8 +145,8 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
   <div class=panel>
     <h3>设置</h3>
     <div class=row>
-      <label>鼠标灵敏度 <span id=senVal>1.0</span></label>
-      <input type=range id=sen min="1" max="10" step="0.1" value="1">
+      <label>鼠标灵敏度 <span id=senVal>4.0</span></label>
+      <input type=range id=sen min="1" max="10" step="0.1" value="4">
     </div>
     <div class=row>
       <label>滚轮速度 <span id=scrVal>1.0</span></label>
@@ -157,8 +157,8 @@ button.mouse-key{background:var(--surface2);color:var(--accent);border:1px solid
       <input type=range id=rep min="30" max="500" step="10" value="150">
     </div>
     <div class=row>
-      <label>底部黑边(px) <span id=padHVal>0</span></label>
-      <input type=range id=padH min="0" max="400" step="10" value="0">
+      <label>底部黑边(px) <span id=padHVal>50</span></label>
+      <input type=range id=padH min="0" max="400" step="10" value="50">
     </div>
     <button class=close id=setClose>完成</button>
   </div>
@@ -253,7 +253,7 @@ deviceNameInput.addEventListener("keydown",function(e){
 });
 deviceOverlay.addEventListener("click",function(e){if(e.target===deviceOverlay)closeDeviceEditor();});
 /* settings (persisted) */
-var SET={sen:1,scr:1,rep:150,pad:0};
+var SET={sen:4,scr:1,rep:150,pad:50};
 try{var s=JSON.parse(localStorage.getItem("pastelink_set"));if(s)SET=Object.assign(SET,s);}catch(e){}
 function saveSet(){try{localStorage.setItem("pastelink_set",JSON.stringify(SET));}catch(e){}}
 
